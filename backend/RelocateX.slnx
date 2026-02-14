@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="RelocateX.API/RelocateX.API.csproj" />
+  <Project Path="RelocateX.Application/RelocateX.Application.csproj" />
+  <Project Path="RelocateX.Domain/RelocateX.Domain.csproj" />
+  <Project Path="RelocateX.Infrastructure/RelocateX.Infrastructure.csproj" />
+</Solution>
