@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RelocateX.Application\RelocateX.Application.csproj" />
+    <ProjectReference Include="..\RelocateX.Infrastructure\RelocateX.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
 ﻿using RelocateX.Domain.Common;
+using RelocateX.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +8,10 @@ using System.Threading.Tasks;
 
 namespace RelocateX.Domain.Entities
 {
-    public class User : BaseEntity
+    public class User
     {
+        public int Id { get; set; }
+
         public string FullName { get; set; } = string.Empty;
 
         public string Email { get; set; } = string.Empty;
@@ -17,6 +20,10 @@ namespace RelocateX.Domain.Entities
 
         public string PasswordHash { get; set; } = string.Empty;
 
-        public string Role { get; set; } = "Customer";
+        public UserRole Role { get; set; }
+
+        public bool IsVerified { get; set; }
+
+        public DateTime CreatedAt { get; set; }
     }
 }
