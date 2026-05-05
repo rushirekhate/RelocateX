@@ -16,3 +16,9 @@ obj
 # OS files
 .DS_Store
 Thumbs.db
+node_modules/
+target/
+.env
+*.log
+dist/
+build/
