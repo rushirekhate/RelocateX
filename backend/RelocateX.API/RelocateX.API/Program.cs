@@ -4,17 +4,17 @@ using RelocateX.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --------------------
+// -----------------------------
 // Add services to container
-// --------------------
+// -----------------------------
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// --------------------
-// CORS for React (Vite runs on 5173)
-// --------------------
+// -----------------------------
+// CORS (for React frontend)
+// -----------------------------
 
 builder.Services.AddCors(options =>
 {
@@ -27,18 +27,23 @@ builder.Services.AddCors(options =>
         });
 });
 
-// --------------------
+// -----------------------------
 // Dependency Injection
-// --------------------
+// -----------------------------
 
 builder.Services.AddScoped<BookingRepository>();
 builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IChatService, ChatService>();
+
+// -----------------------------
+// Build App
+// -----------------------------
 
 var app = builder.Build();
 
-// --------------------
+// -----------------------------
 // Configure HTTP pipeline
-// --------------------
+// -----------------------------
 
 if (app.Environment.IsDevelopment())
 {

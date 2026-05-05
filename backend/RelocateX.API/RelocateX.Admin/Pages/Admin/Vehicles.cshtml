@@ -1,0 +1,272 @@
+﻿@page
+@model RelocateX.Admin.Pages.Admin.VehiclesModel
+@{
+    ViewData["Title"] = "Vehicles";
+}
+
+<!-- ═══════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════ -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="mb-1" style="font-weight:700; color:#1a1a2e;">Vehicles</h5>
+        <p class="mb-0" style="font-size:0.82rem; color:#6b7280;">
+            Manage your fleet — <strong>@Model.Vehicles.Count</strong> vehicles total
+        </p>
+    </div>
+    <button class="btn btn-primary" onclick="openAddModal()">
+        <i class="bi bi-plus-lg me-2"></i>Add Vehicle
+    </button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SUCCESS / ERROR
+═══════════════════════════════════════ -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success d-flex align-items-center gap-2 mb-4" style="border-radius:10px; border:none;">
+        <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger d-flex align-items-center gap-2 mb-4" style="border-radius:10px; border:none;">
+        <i class="bi bi-exclamation-circle-fill"></i> @TempData["Error"]
+    </div>
+}
+
+<!-- ═══════════════════════════════════════
+     VEHICLES TABLE
+═══════════════════════════════════════ -->
+<div class="card">
+    <div class="card-body p-0">
+        @if (Model.Vehicles.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">#</th>
+                            <th>Vehicle Name</th>
+                            <th>Description</th>
+                            <th>Capacity</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var v in Model.Vehicles)
+                        {
+                            <tr>
+                                <td class="ps-4" style="color:#9ca3af; font-size:0.8rem;">#@v.Id</td>
+
+                                <!-- Vehicle Name with Icon -->
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div style="width:40px; height:40px; background:linear-gradient(135deg,#e94560,#0f3460);
+                                            border-radius:10px; display:flex; align-items:center;
+                                            justify-content:center; color:#fff; font-size:1.1rem; flex-shrink:0;">
+                                            @GetVehicleIcon(v.Name)
+                                        </div>
+                                        <div>
+                                            <div style="font-weight:600; font-size:0.875rem;">@v.Name</div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td style="font-size:0.875rem; color:#6b7280; max-width:200px;">
+                                    @v.Description
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-light text-dark" style="font-size:0.78rem; border-radius:6px;">
+                                        <i class="bi bi-box me-1"></i>@v.Capacity
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @if (v.IsActive)
+                                    {
+                                        <span class="badge badge-confirmed px-2 py-1" style="border-radius:6px; font-size:0.75rem;">
+                                            <i class="bi bi-circle-fill me-1" style="font-size:0.45rem;"></i>Active
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-cancelled px-2 py-1" style="border-radius:6px; font-size:0.75rem;">
+                                            <i class="bi bi-circle-fill me-1" style="font-size:0.45rem;"></i>Inactive
+                                        </span>
+                                    }
+                                </td>
+
+                                <td style="font-size:0.82rem; color:#6b7280;">
+                                    @v.CreatedAt?.ToString("dd MMM yyyy")
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-1">
+                                        <!-- Edit -->
+                                        <button class="btn btn-sm btn-light" title="Edit"
+                                                onclick="openEditModal(@v.Id, '@v.Name', '@v.Description', '@v.Capacity', @v.IsActive.ToString().ToLower())">
+                                            <i class="bi bi-pencil-fill text-primary"></i>
+                                        </button>
+                                        <!-- Toggle Active/Inactive -->
+                                        <form method="post" asp-page-handler="ToggleStatus">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="vehicleId" value="@v.Id" />
+                                            <input type="hidden" name="isActive" value="@(!v.IsActive)" />
+                                            <button type="submit" class="btn btn-sm btn-light"
+                                                    title="@(v.IsActive ? "Deactivate" : "Activate")">
+                                                <i class="bi @(v.IsActive ? "bi-toggle-on text-success" : "bi-toggle-off text-secondary")"></i>
+                                            </button>
+                                        </form>
+                                        <!-- Delete -->
+                                        <form method="post" asp-page-handler="Delete"
+                                              onsubmit="return confirm('Delete @v.Name? This will also delete its pricing slabs.')">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="vehicleId" value="@v.Id" />
+                                            <button type="submit" class="btn btn-sm btn-light" title="Delete">
+                                                <i class="bi bi-trash-fill text-danger"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-truck" style="font-size:3rem; opacity:0.25;"></i>
+                <p class="mt-3 mb-1" style="font-size:0.9rem;">No vehicles added yet</p>
+                <button class="btn btn-primary btn-sm mt-1" onclick="openAddModal()">
+                    <i class="bi bi-plus-lg me-1"></i>Add First Vehicle
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     ADD / EDIT VEHICLE MODAL
+═══════════════════════════════════════ -->
+<div class="modal fade" id="vehicleModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px; border:none;">
+            <div class="modal-header" style="border-bottom:1px solid #f0f2f5;">
+                <h6 class="modal-title fw-bold" id="modalTitle">
+                    <i class="bi bi-truck me-2 text-primary"></i>Add Vehicle
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form method="post" id="vehicleForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Vehicle.Id" id="vehicleId" value="0" />
+
+                <div class="modal-body">
+                    <div class="row g-3">
+
+                        <!-- Vehicle Name -->
+                        <div class="col-12">
+                            <label class="form-label" style="font-size:0.82rem; font-weight:600;">
+                                Vehicle Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="Vehicle.Name" id="v-name"
+                                   class="form-control" placeholder="e.g. Bike, Mini Truck, Large Truck"
+                                   required />
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <label class="form-label" style="font-size:0.82rem; font-weight:600;">Description</label>
+                            <textarea name="Vehicle.Description" id="v-desc"
+                                      class="form-control" rows="2"
+                                      placeholder="Short description of this vehicle"></textarea>
+                        </div>
+
+                        <!-- Capacity -->
+                        <div class="col-12">
+                            <label class="form-label" style="font-size:0.82rem; font-weight:600;">
+                                Capacity <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="Vehicle.Capacity" id="v-capacity"
+                                   class="form-control" placeholder="e.g. 500 kg, 2 Ton, 5 Ton"
+                                   required />
+                        </div>
+
+                        <!-- Active Status (only for edit) -->
+                        <div class="col-12" id="statusRow" style="display:none;">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox"
+                                       name="Vehicle.IsActive" id="v-active" value="true" />
+                                <label class="form-check-label" for="v-active"
+                                       style="font-size:0.875rem; font-weight:500;">
+                                    Active (visible to customers)
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="border-top:1px solid #f0f2f5;">
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-sm" id="submitBtn">
+                        <i class="bi bi-plus-lg me-1"></i>Add Vehicle
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetVehicleIcon(string? name)
+    {
+        if (name == null) return "🚛";
+        var n = name.ToLower();
+        if (n.Contains("bike")) return "🏍️";
+        if (n.Contains("mini")) return "🚐";
+        if (n.Contains("container")) return "🚢";
+        return "🚛";
+    }
+}
+
+@section Scripts {
+    <script>
+        function openAddModal() {
+            document.getElementById('modalTitle').innerHTML = '<i class="bi bi-truck me-2 text-primary"></i>Add Vehicle';
+            document.getElementById('submitBtn').innerHTML  = '<i class="bi bi-plus-lg me-1"></i>Add Vehicle';
+            document.getElementById('vehicleForm').action  = '?handler=Add';
+            document.getElementById('vehicleId').value     = '0';
+            document.getElementById('v-name').value        = '';
+            document.getElementById('v-desc').value        = '';
+            document.getElementById('v-capacity').value    = '';
+            document.getElementById('statusRow').style.display = 'none';
+            new bootstrap.Modal(document.getElementById('vehicleModal')).show();
+        }
+
+        function openEditModal(id, name, desc, capacity, isActive) {
+            document.getElementById('modalTitle').innerHTML = '<i class="bi bi-pencil me-2 text-primary"></i>Edit Vehicle';
+            document.getElementById('submitBtn').innerHTML  = '<i class="bi bi-check-lg me-1"></i>Save Changes';
+            document.getElementById('vehicleForm').action  = '?handler=Edit';
+            document.getElementById('vehicleId').value     = id;
+            document.getElementById('v-name').value        = name;
+            document.getElementById('v-desc').value        = desc;
+            document.getElementById('v-capacity').value    = capacity;
+            document.getElementById('v-active').checked    = isActive;
+            document.getElementById('statusRow').style.display = 'block';
+            new bootstrap.Modal(document.getElementById('vehicleModal')).show();
+        }
+    </script>
+}

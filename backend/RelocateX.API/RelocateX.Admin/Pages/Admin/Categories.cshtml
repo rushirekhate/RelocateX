@@ -1,0 +1,214 @@
+﻿@page
+@model RelocateX.Admin.Pages.Admin.CategoriesModel
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<!-- PAGE HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="mb-1" style="font-weight:700; color:#1a1a2e;">Categories</h5>
+        <p class="mb-0" style="font-size:0.82rem; color:#6b7280;">
+            Manage house/service categories — <strong>@Model.Categories.Count</strong> total
+        </p>
+    </div>
+    <button class="btn btn-primary" onclick="openAddModal()">
+        <i class="bi bi-plus-lg me-2"></i>Add Category
+    </button>
+</div>
+
+<!-- SUCCESS / ERROR -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success d-flex align-items-center gap-2 mb-4" style="border-radius:10px; border:none;">
+        <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger d-flex align-items-center gap-2 mb-4" style="border-radius:10px; border:none;">
+        <i class="bi bi-exclamation-circle-fill"></i> @TempData["Error"]
+    </div>
+}
+
+<!-- CATEGORIES TABLE -->
+<div class="card">
+    <div class="card-body p-0">
+        @if (Model.Categories.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">#</th>
+                            <th>Category Name</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model.Categories)
+                        {
+                            <tr>
+                                <td class="ps-4" style="color:#9ca3af;">#@c.Id</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div style="width:34px; height:34px; border-radius:8px;
+                                            background:linear-gradient(135deg,#2563eb,#0f3460);
+                                            display:flex; align-items:center; justify-content:center;
+                                            color:#fff; font-size:0.85rem; flex-shrink:0;">
+                                            <i class="bi bi-tags-fill"></i>
+                                        </div>
+                                        <span style="font-weight:500;">@c.Name</span>
+                                    </div>
+                                </td>
+                                <td style="font-size:0.82rem; color:#6b7280; max-width:250px;">
+                                    @(string.IsNullOrEmpty(c.Description) ? "—" : c.Description)
+                                </td>
+                                <td>
+                                    @if (c.IsActive)
+                                    {
+                                        <span class="badge badge-confirmed px-2 py-1" style="border-radius:6px; font-size:0.75rem;">
+                                            <i class="bi bi-check2 me-1"></i>Active
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-cancelled px-2 py-1" style="border-radius:6px; font-size:0.75rem;">
+                                            <i class="bi bi-x me-1"></i>Inactive
+                                        </span>
+                                    }
+                                </td>
+                                <td style="font-size:0.82rem; color:#6b7280;">
+                                    @c.CreatedAt?.ToString("dd MMM yyyy")
+                                </td>
+                                <td class="text-center">
+                                    <!-- Edit Button -->
+                                    <button class="btn btn-sm btn-outline-secondary me-1"
+                                            style="font-size:0.75rem;"
+                                            onclick="openEditModal(@c.Id, '@c.Name?.Replace("'", "\\'")', '@c.Description?.Replace("'", "\\'")', @c.IsActive.ToString().ToLower())">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+
+                                    <!-- Toggle Status -->
+                                    <form method="post" asp-page-handler="ToggleStatus" style="display:inline;">
+                                        <input type="hidden" name="categoryId" value="@c.Id" />
+                                        <input type="hidden" name="isActive" value="@(!c.IsActive)" />
+                                        <button type="submit" class="btn btn-sm @(c.IsActive ? "btn-outline-warning" : "btn-outline-success") me-1"
+                                                style="font-size:0.75rem;"
+                                                title="@(c.IsActive ? "Deactivate" : "Activate")">
+                                            <i class="bi @(c.IsActive ? "bi-pause-fill" : "bi-play-fill")"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Delete -->
+                                    <form method="post" asp-page-handler="Delete" style="display:inline;">
+                                        <input type="hidden" name="categoryId" value="@c.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                style="font-size:0.75rem;"
+                                                onclick="return confirm('Delete category \'@c.Name\'? This cannot be undone.')">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-tags" style="font-size:2.5rem; opacity:0.3;"></i>
+                <p class="mt-2 mb-0" style="font-size:0.88rem;">No categories yet. Add your first one!</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ═══ ADD MODAL ═══ -->
+<div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius:12px; border:none;">
+            <div class="modal-header" style="border-bottom:1px solid #f0f2f5;">
+                <h6 class="modal-title" style="font-weight:700;">Add New Category</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-page-handler="Add">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size:0.82rem; font-weight:600;">Category Name <span class="text-danger">*</span></label>
+                        <input type="text" name="Category.Name" class="form-control" placeholder="e.g. 1BHK, 2BHK, Office Shift" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size:0.82rem; font-weight:600;">Description</label>
+                        <textarea name="Category.Description" class="form-control" rows="3"
+                                  placeholder="Optional short description..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid #f0f2f5;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i>Add Category
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ EDIT MODAL ═══ -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius:12px; border:none;">
+            <div class="modal-header" style="border-bottom:1px solid #f0f2f5;">
+                <h6 class="modal-title" style="font-weight:700;">Edit Category</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-page-handler="Edit">
+                <div class="modal-body">
+                    <input type="hidden" name="Category.Id" id="editId" />
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size:0.82rem; font-weight:600;">Category Name <span class="text-danger">*</span></label>
+                        <input type="text" name="Category.Name" id="editName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size:0.82rem; font-weight:600;">Description</label>
+                        <textarea name="Category.Description" id="editDesc" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size:0.82rem; font-weight:600;">Status</label>
+                        <select name="Category.IsActive" id="editActive" class="form-select">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid #f0f2f5;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-floppy me-1"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openAddModal() {
+            new bootstrap.Modal(document.getElementById('addModal')).show();
+        }
+        function openEditModal(id, name, desc, isActive) {
+            document.getElementById('editId').value    = id;
+            document.getElementById('editName').value  = name;
+            document.getElementById('editDesc').value  = desc;
+            document.getElementById('editActive').value = isActive.toString();
+            new bootstrap.Modal(document.getElementById('editModal')).show();
+        }
+    </script>
+}

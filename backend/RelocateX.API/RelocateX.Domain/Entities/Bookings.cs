@@ -15,6 +15,18 @@
 
         public string? HouseSize { get; set; }
 
+        // ── Status: Pending | Confirmed | Completed | Cancelled ──
+        public string Status { get; set; } = "Pending";
+
+        // ── Admin Notes ──
+        public string? Notes { get; set; }
+
+        // ── Total Charge (Rupees) ──
+        public decimal? TotalCharge { get; set; }
+
+        // ── Vehicle assigned ──
+        public int? VehicleId { get; set; }
+
         public DateTime? CreatedDate { get; set; }
     }
 }

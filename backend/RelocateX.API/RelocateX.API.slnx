@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="RelocateX.Admin/RelocateX.Admin.csproj" Id="d9a23d56-fee3-400b-94d6-1bec8b746cbc" />
   <Project Path="RelocateX.API/RelocateX.API.csproj" />
   <Project Path="RelocateX.Application/RelocateX.Application.csproj" />
   <Project Path="RelocateX.Domain/RelocateX.Domain.csproj" />

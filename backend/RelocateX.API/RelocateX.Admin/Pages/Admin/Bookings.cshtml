@@ -1,0 +1,340 @@
+﻿@page
+@model RelocateX.Admin.Pages.Admin.BookingsModel
+@{
+    ViewData["Title"] = "Bookings";
+}
+
+<!-- ═══════════════════════════════════════
+     PAGE HEADER
+═══════════════════════════════════════ -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="mb-1" style="font-weight:700; color:#1a1a2e;">All Bookings</h5>
+        <p class="mb-0" style="font-size:0.82rem; color:#6b7280;">
+            Total <strong>@Model.TotalCount</strong> bookings found
+        </p>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     FILTER BAR
+═══════════════════════════════════════ -->
+<div class="card mb-4">
+    <div class="card-body py-3">
+        <form method="get">
+            <div class="row g-3 align-items-end">
+
+                <!-- Search -->
+                <div class="col-md-4">
+                    <label class="form-label" style="font-size:0.78rem; font-weight:600; color:#6b7280;">SEARCH</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="bi bi-search" style="font-size:0.85rem; color:#6b7280;"></i>
+                        </span>
+                        <input type="text" name="search" value="@Model.SearchTerm"
+                               class="form-control border-start-0"
+                               placeholder="Name, phone, city..." />
+                    </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="col-md-3">
+                    <label class="form-label" style="font-size:0.78rem; font-weight:600; color:#6b7280;">STATUS</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="Pending" selected="@(Model.StatusFilter == "Pending")">Pending</option>
+                        <option value="Confirmed" selected="@(Model.StatusFilter == "Confirmed")">Confirmed</option>
+                        <option value="Completed" selected="@(Model.StatusFilter == "Completed")">Completed</option>
+                        <option value="Cancelled" selected="@(Model.StatusFilter == "Cancelled")">Cancelled</option>
+                    </select>
+                </div>
+
+                <!-- Date Filter -->
+                <div class="col-md-3">
+                    <label class="form-label" style="font-size:0.78rem; font-weight:600; color:#6b7280;">SHIFT DATE</label>
+                    <input type="date" name="shiftDate" value="@Model.DateFilter"
+                           class="form-control" />
+                </div>
+
+                <!-- Buttons -->
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <i class="bi bi-funnel me-1"></i>Filter
+                    </button>
+                    <a href="/Admin/Bookings" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SUCCESS / ERROR MESSAGES
+═══════════════════════════════════════ -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success d-flex align-items-center gap-2 mb-4" style="border-radius:10px; border:none;">
+        <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger d-flex align-items-center gap-2 mb-4" style="border-radius:10px; border:none;">
+        <i class="bi bi-exclamation-circle-fill"></i> @TempData["Error"]
+    </div>
+}
+
+<!-- ═══════════════════════════════════════
+     BOOKINGS TABLE
+═══════════════════════════════════════ -->
+<div class="card">
+    <div class="card-body p-0">
+        @if (Model.Bookings.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">#</th>
+                            <th>Customer</th>
+                            <th>City</th>
+                            <th>Route</th>
+                            <th>Shift Date</th>
+                            <th>House Size</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var b in Model.Bookings)
+                        {
+                            <tr>
+                                <!-- ID -->
+                                <td class="ps-4" style="color:#9ca3af; font-size:0.8rem;">#@b.Id</td>
+
+                                <!-- Customer -->
+                                <td>
+                                    <div style="font-weight:600; font-size:0.875rem;">@b.FullName</div>
+                                    <div style="font-size:0.75rem; color:#6b7280;">
+                                        <i class="bi bi-telephone me-1"></i>@b.Phone
+                                    </div>
+                                    <div style="font-size:0.75rem; color:#6b7280;">
+                                        <i class="bi bi-envelope me-1"></i>@b.Email
+                                    </div>
+                                </td>
+
+                                <!-- City -->
+                                <td>
+                                    <span style="font-size:0.875rem;">
+                                        <i class="bi bi-geo-alt me-1 text-danger"></i>@b.City
+                                    </span>
+                                </td>
+
+                                <!-- Route -->
+                                <td>
+                                    <div style="font-size:0.78rem; color:#374151;">
+                                        <i class="bi bi-circle-fill text-success me-1" style="font-size:0.45rem;"></i>
+                                        @b.PickupLocation
+                                    </div>
+                                    <div style="font-size:0.72rem; color:#9ca3af; margin:2px 0 2px 10px;">↓</div>
+                                    <div style="font-size:0.78rem; color:#374151;">
+                                        <i class="bi bi-circle-fill text-danger me-1" style="font-size:0.45rem;"></i>
+                                        @b.DropLocation
+                                    </div>
+                                </td>
+
+                                <!-- Shift Date -->
+                                <td style="font-size:0.875rem;">
+                                    @b.ShiftDate?.ToString("dd MMM yyyy")
+                                </td>
+
+                                <!-- House Size -->
+                                <td>
+                                    <span class="badge bg-light text-dark" style="font-size:0.78rem; border-radius:6px;">
+                                        @b.HouseSize
+                                    </span>
+                                </td>
+
+                                <!-- Status Badge -->
+                                <td>
+                                    <span class="badge @GetStatusBadge(b.Status) px-2 py-1" style="border-radius:6px; font-size:0.75rem;">
+                                        @b.Status
+                                    </span>
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-1">
+
+                                        <!-- View Details Button -->
+                                        <button class="btn btn-sm btn-light"
+                                                title="View Details"
+                                                onclick="showDetails(@b.Id, '@b.FullName', '@b.Phone', '@b.Email', '@b.City', '@b.PickupLocation', '@b.DropLocation', '@b.ShiftDate?.ToString("dd MMM yyyy")', '@b.HouseSize', '@b.Status', '@b.Notes', '@b.TotalCharge')">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+
+                                        <!-- Change Status Dropdown -->
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" title="Change Status">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width:160px; border-radius:10px; border:none;">
+                                                <li><span class="dropdown-header" style="font-size:0.72rem;">Change Status</span></li>
+                                                @foreach (var s in new[] { "Pending", "Confirmed", "Completed", "Cancelled" })
+                                                {
+                                                    <li>
+                                                        <form method="post" asp-page-handler="UpdateStatus">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="bookingId" value="@b.Id" />
+                                                            <input type="hidden" name="newStatus" value="@s" />
+                                                            <button type="submit"
+                                                                    class="dropdown-item @(b.Status == s ? "fw-bold text-primary" : "")"
+                                                                    style="font-size:0.82rem;">
+                                                                @if (b.Status == s)
+                                                                {
+                                                                    <i class="bi bi-check2 me-2"></i>
+                                                                }
+                                                                @s
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox" style="font-size:3rem; opacity:0.25;"></i>
+                <p class="mt-3 mb-0" style="font-size:0.9rem;">No bookings found</p>
+                <p style="font-size:0.8rem; color:#9ca3af;">Try changing your filters</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     BOOKING DETAIL MODAL
+═══════════════════════════════════════ -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px; border:none;">
+            <div class="modal-header" style="border-bottom:1px solid #f0f2f5;">
+                <h6 class="modal-title fw-bold">
+                    <i class="bi bi-calendar2-check me-2 text-primary"></i>
+                    Booking Details
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div style="font-size:0.72rem; color:#9ca3af; font-weight:600; text-transform:uppercase;">Customer Name</div>
+                        <div id="d-name" style="font-size:0.9rem; font-weight:600; color:#1a1a2e;"></div>
+                    </div>
+                    <div class="col-6">
+                        <div style="font-size:0.72rem; color:#9ca3af; font-weight:600; text-transform:uppercase;">Status</div>
+                        <div id="d-status"></div>
+                    </div>
+                    <div class="col-6">
+                        <div style="font-size:0.72rem; color:#9ca3af; font-weight:600; text-transform:uppercase;">Phone</div>
+                        <div id="d-phone" style="font-size:0.875rem;"></div>
+                    </div>
+                    <div class="col-6">
+                        <div style="font-size:0.72rem; color:#9ca3af; font-weight:600; text-transform:uppercase;">Email</div>
+                        <div id="d-email" style="font-size:0.875rem;"></div>
+                    </div>
+                    <div class="col-12">
+                        <div style="font-size:0.72rem; color:#9ca3af; font-weight:600; text-transform:uppercase;">City</div>
+                        <div id="d-city" style="font-size:0.875rem;"></div>
+                    </div>
+                    <div class="col-12">
+                        <div style="font-size:0.72rem; color:#9ca3af; font-weight:600; text-transform:uppercase; margin-bottom:6px;">Route</div>
+                        <div class="p-3 rounded-3" style="background:#f9fafb;">
+                            <div style="font-size:0.82rem;">
+                                <i class="bi bi-circle-fill text-success me-2" style="font-size:0.45rem;"></i>
+                                <strong>From:</strong> <span id="d-pickup"></span>
+                            </div>
+                            <div style="font-size:0.72rem; color:#9ca3af; margin:4px 0 4px 18px;">↓</div>
+                            <div style="font-size:0.82rem;">
+                                <i class="bi bi-circle-fill text-danger me-2" style="font-size:0.45rem;"></i>
+                                <strong>To:</strong> <span id="d-drop"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div style="font-size:0.72rem; color:#9ca3af; font-weight:600; text-transform:uppercase;">Shift Date</div>
+                        <div id="d-date" style="font-size:0.875rem;"></div>
+                    </div>
+                    <div class="col-6">
+                        <div style="font-size:0.72rem; color:#9ca3af; font-weight:600; text-transform:uppercase;">House Size</div>
+                        <div id="d-house" style="font-size:0.875rem;"></div>
+                    </div>
+                    <div class="col-6">
+                        <div style="font-size:0.72rem; color:#9ca3af; font-weight:600; text-transform:uppercase;">Total Charge</div>
+                        <div id="d-charge" style="font-size:0.875rem; font-weight:600; color:#059669;"></div>
+                    </div>
+                    <div class="col-12" id="notes-section">
+                        <div style="font-size:0.72rem; color:#9ca3af; font-weight:600; text-transform:uppercase;">Notes</div>
+                        <div id="d-notes" style="font-size:0.875rem;"></div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer" style="border-top:1px solid #f0f2f5;">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusBadge(string? status) => status switch
+    {
+        "Confirmed" => "badge-confirmed",
+        "Cancelled" => "badge-cancelled",
+        "Completed" => "badge-completed",
+        _ => "badge-pending"
+    };
+}
+
+@section Scripts {
+    <script>
+        function showDetails(id, name, phone, email, city, pickup, drop, date, house, status, notes, charge) {
+            document.getElementById('d-name').textContent    = name;
+            document.getElementById('d-phone').textContent   = phone;
+            document.getElementById('d-email').textContent   = email;
+            document.getElementById('d-city').textContent    = city;
+            document.getElementById('d-pickup').textContent  = pickup;
+            document.getElementById('d-drop').textContent    = drop;
+            document.getElementById('d-date').textContent    = date;
+            document.getElementById('d-house').textContent   = house;
+            document.getElementById('d-notes').textContent   = notes || 'No notes';
+            document.getElementById('d-charge').textContent  = charge ? '₹' + charge : 'Not calculated';
+
+            // Status badge
+            const badgeMap = {
+                'Pending':   'badge-pending',
+                'Confirmed': 'badge-confirmed',
+                'Completed': 'badge-completed',
+                'Cancelled': 'badge-cancelled'
+            };
+            document.getElementById('d-status').innerHTML =
+                `<span class="badge ${badgeMap[status] || 'badge-pending'} px-2 py-1" style="border-radius:6px; font-size:0.78rem;">${status}</span>`;
+
+            new bootstrap.Modal(document.getElementById('detailModal')).show();
+        }
+    </script>
+}
