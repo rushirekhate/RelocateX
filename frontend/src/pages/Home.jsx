@@ -141,7 +141,7 @@ export default function Home() {
 
     setLoading(true); setMessage(null)
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "https://localhost:7266"
+     const apiUrl = import.meta.env.VITE_API_URL || "https://localhost:7266"
       const res = await fetch(`${apiUrl}/api/Booking/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
