@@ -1,0 +1,6 @@
+[build]
+builder = "dockerfile"
+dockerfilePath = "backend/RelocateX.API/RelocateX.API/Dockerfile"
+
+[deploy]
+startCommand = "dotnet RelocateX.API.dll"
