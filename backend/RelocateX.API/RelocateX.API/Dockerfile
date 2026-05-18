@@ -7,10 +7,8 @@ WORKDIR /src
 
 COPY . .
 
-WORKDIR /src/RelocateX.API
-
-RUN dotnet restore "RelocateX.API.csproj"
-RUN dotnet publish "RelocateX.API.csproj" -c Release -o /app/publish
+RUN dotnet restore "./RelocateX.API.csproj"
+RUN dotnet publish "./RelocateX.API.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
