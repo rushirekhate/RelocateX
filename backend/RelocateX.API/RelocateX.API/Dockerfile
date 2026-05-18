@@ -1,26 +1,19 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy project files
 COPY ["RelocateX.API/RelocateX.API.csproj", "RelocateX.API/"]
 COPY ["RelocateX.Application/RelocateX.Application.csproj", "RelocateX.Application/"]
 COPY ["RelocateX.Domain/RelocateX.Domain.csproj", "RelocateX.Domain/"]
 COPY ["RelocateX.Infrastructure/RelocateX.Infrastructure.csproj", "RelocateX.Infrastructure/"]
 
-# Restore
 RUN dotnet restore "RelocateX.API/RelocateX.API.csproj"
-
-# Copy all source code
 COPY . .
-
-# Publish
-WORKDIR /src/RelocateX.API
-RUN dotnet publish "RelocateX.API.csproj" -c Release -o /app/publish
+WORKDIR "/src/RelocateX.API"
+RUN dotnet publish -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
