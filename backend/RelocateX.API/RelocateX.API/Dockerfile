@@ -12,7 +12,7 @@ COPY ["RelocateX.Infrastructure/RelocateX.Infrastructure.csproj", "RelocateX.Inf
 
 RUN dotnet restore "RelocateX.API/RelocateX.API.csproj"
 COPY . .
-WORKDIR "/src/RelocateX.API"
+WORKDIR "/src"
 RUN dotnet publish -c Release -o /app/publish
 
 FROM base AS final
