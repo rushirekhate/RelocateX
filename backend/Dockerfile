@@ -5,11 +5,17 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY . .
+COPY backend/RelocateX.API/RelocateX.API/RelocateX.API.csproj ./RelocateX.API/
+COPY backend/RelocateX.API/RelocateX.Application/RelocateX.Application.csproj ./RelocateX.Application/
+COPY backend/RelocateX.API/RelocateX.Domain/RelocateX.Domain.csproj ./RelocateX.Domain/
+COPY backend/RelocateX.API/RelocateX.Infrastructure/RelocateX.Infrastructure.csproj ./RelocateX.Infrastructure/
+
+RUN dotnet restore ./RelocateX.API/RelocateX.API.csproj
+
+COPY backend/RelocateX.API/. .
 
 WORKDIR /src/RelocateX.API
 
-RUN dotnet restore "RelocateX.API.csproj"
 RUN dotnet publish "RelocateX.API.csproj" -c Release -o /app/publish
 
 FROM base AS final
