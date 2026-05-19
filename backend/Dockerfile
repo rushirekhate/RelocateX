@@ -1,20 +1,20 @@
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 8080
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY backend/RelocateX.API/RelocateX.API/RelocateX.API.csproj ./RelocateX.API/
-COPY backend/RelocateX.API/RelocateX.Application/RelocateX.Application.csproj ./RelocateX.Application/
-COPY backend/RelocateX.API/RelocateX.Domain/RelocateX.Domain.csproj ./RelocateX.Domain/
-COPY backend/RelocateX.API/RelocateX.Infrastructure/RelocateX.Infrastructure.csproj ./RelocateX.Infrastructure/
+COPY ["RelocateX.API/RelocateX.API.csproj", "RelocateX.API/"]
+COPY ["RelocateX.Application/RelocateX.Application.csproj", "RelocateX.Application/"]
+COPY ["RelocateX.Domain/RelocateX.Domain.csproj", "RelocateX.Domain/"]
+COPY ["RelocateX.Infrastructure/RelocateX.Infrastructure.csproj", "RelocateX.Infrastructure/"]
 
-RUN dotnet restore ./RelocateX.API/RelocateX.API.csproj
+RUN dotnet restore "RelocateX.API/RelocateX.API.csproj"
 
-COPY backend/RelocateX.API/. .
+COPY . .
 
-WORKDIR /src/RelocateX.API
+WORKDIR "/src/RelocateX.API"
 
 RUN dotnet publish "RelocateX.API.csproj" -c Release -o /app/publish
 
